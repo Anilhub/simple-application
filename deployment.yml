@@ -1,0 +1,23 @@
+- name: ec2 launch configuration
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tasks: 
+    - name: create ec2 launch configuration
+      ec2_lc: 
+        name: launchconfiguration-v1
+        image_id: ami-042e8287309f5df03
+        instance_type: t2.micro
+        key_name: aws_devops
+        region: us-east-1
+        user_data_path: src/main/scripts/bootstrap.sh
+      register: ec2_lc
+    
+    - name: create auto scaling group
+      ec2_asg: 
+        name: app_asg
+        region: us-east-1
+        launch_config_name: "{{ec2_lc.name}}"
+        replace_all_instances: yes
+        wait_for_instances: yes
